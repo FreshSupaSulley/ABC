@@ -1,0 +1,72 @@
+/* Global styling sheet */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+/* Common fade */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Swipe left animations */
+::view-transition-old(left)[data-direction="left"] {
+  animation: fade-out 300ms ease forwards, slide-to-left 300ms ease forwards;
+}
+::view-transition-new(left)[data-direction="left"] {
+  animation: fade-in 300ms ease 100ms forwards,
+    slide-from-right 300ms ease forwards;
+}
+
+/* Swipe right animations */
+::view-transition-old(right)[data-direction="right"] {
+  animation: fade-out 300ms ease forwards, slide-to-right 300ms ease forwards;
+}
+::view-transition-new(right)[data-direction="right"] {
+  animation: fade-in 300ms ease 100ms forwards,
+    slide-from-left 300ms ease forwards;
+}
+
+/* Slide keyframes */
+@keyframes slide-to-left {
+  to {
+    transform: translateX(-100%);
+  }
+}
+@keyframes slide-from-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes slide-to-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes slide-from-left {
+  from {
+    transform: translateX(-100%);
+  }
+}
