@@ -18,11 +18,7 @@ function MainLayout() {
         if (location.pathname !== prevLocation.current) {
             // Simple example logic:
             // If new path is alphabetically greater, swipe left, else swipe right
-            if (location.pathname > prevLocation.current) {
-                setDirection('left');
-            } else {
-                setDirection('right');
-            }
+            setDirection(location.pathname > prevLocation.current ? 'left' : 'right');
             prevLocation.current = location.pathname;
         }
     }, [location.pathname]);
@@ -53,10 +49,11 @@ function MainLayout() {
                 </Container>
             </AppBar>
             {/* Page Content with animation */}
-            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', viewTransitionName: 'left', }}>
+            <Box component="div" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', viewTransitionName: direction }}>
                 <Outlet />
             </Box>
         </ >
     );
 }
+
 export default MainLayout;
