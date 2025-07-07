@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom"
+import { Navigate, useNavigate } from "react-router-dom"
 import { jwtDecode } from "jwt-decode"
 import api from "../api"
 import { REFRESH_TOKEN, ACCESS_TOKEN } from "../constants"
@@ -6,11 +6,12 @@ import { useState, useEffect } from "react"
 
 // Sends the user to the login screen if they're not authorized
 function ProtectedRoute({ children }) {
+    const navigator = useNavigate();
     const [isAuthorized, setIsAuthorized] = useState(null);
 
     useEffect(() => {
         auth().catch(() => setIsAuthorized(false))
-    }, []);
+    });
 
     const refreshToken = async () => {
         const refreshToken = localStorage.getItem(REFRESH_TOKEN)
@@ -45,11 +46,14 @@ function ProtectedRoute({ children }) {
         }
     };
 
-    if (isAuthorized == null) {
-        return <div>Loading...</div>
+    if (isAuthorized !== true) {
+        if(isAuthorized === false) {
+            console.log("NAVIGATING");
+            navigator("/login", { viewTransition: true });
+        }
+        return <div>Authenticating...</div>
     }
-
-    return isAuthorized ? children : <Navigate to="/login" />
+    return children;
 }
 
 export default ProtectedRoute

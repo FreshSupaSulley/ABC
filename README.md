@@ -4,8 +4,14 @@ React frontend, Django backend. No cookie-cutter BS (yet), unsure to what extent
 
 [Template repo](https://github.com/techwithtim/Django-React-Full-Stack-App/blob/d7f1f708cb7188b25fe2c19e9715d9305e4a2346/backend/api/views.py#L13)
 
-## Quickstart
-You need 2 shells, one for the frontend and one for the backend. See the respective subfolders on how to start them. Or just run `sh run.sh` at the root.
+## Dev
+`sh run.sh`
+
+## Prod
+Must have Docker Desktop open.
+1. `docker-compose down -v` <- delete old image (required)
+2. `docker-compose up --build` <- create new one
+
 
 # bs
 

@@ -1,12 +1,13 @@
-# Use an official Python base image
+# Use an official Python slim base image
 FROM python:3.12-slim
 
-# Set environment variables
+# Environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    POETRY_VERSION=1.8.2
+    POETRY_VERSION=1.8.2 \
+    POETRY_NO_INTERACTION=1
 
-# Set work directory
+# Set working directory
 WORKDIR /app
 
 # Install system dependencies
@@ -15,28 +16,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     git \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
 RUN curl -sSL https://install.python-poetry.org | python3 - && \
     ln -s /root/.local/bin/poetry /usr/local/bin/poetry
 
-# Copy only the necessary files for dependency installation
+# Copy Poetry config and install dependencies
 COPY pyproject.toml poetry.lock* /app/
-
-# Configure Poetry to use the custom PyPI source
-RUN poetry config repositories.nexus_ci https://nexus-ci.onefiserv.net/repository/pypi-group/simple && \
-    poetry config installer.parallel false
-
-# Install dependencies
+RUN poetry config installer.parallel false
 RUN poetry install --no-root --only main
 
 # Copy the rest of the application code
 COPY . /app
 
-# Expose the port Django runs on
+# Expose Django port
 EXPOSE 8000
 
-# Run the Django app
-CMD ["poetry", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
+# We need to create a superuser to do anything
+COPY ./create_superuser.py /app/create_superuser.py
+
+# Start the Django development server
+# CMD ["poetry", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD poetry run python manage.py migrate && \
+    poetry run python /app/create_superuser.py && \
+    poetry run python manage.py runserver 0.0.0.0:8000

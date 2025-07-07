@@ -1,9 +1,8 @@
 import axios from "axios"
 import { ACCESS_TOKEN } from "./constants"
 
-const api = axios.create({
-    baseURL: process.env.REACT_APP_API_URL
-})
+// Base URL handled upstream
+const api = axios.create()
 
 api.interceptors.request.use(
     (config) => {

@@ -4,19 +4,13 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import MainLayout from "./pages/MainLayout";
 import NotFound from "./pages/NotFound";
 import EditSchema from "./pages/pe/EditSchema";
-import Register from "./pages/Register";
-import PEHome from "./pages/pe/Home";
 import Home from "./pages/Home";
+import Schema from "./pages/pe/Schema";
 import Login from "./pages/Login";
 
 function Logout() {
   localStorage.clear()
   return <Navigate to="/login" />
-}
-
-function RegisterAndLogout() {
-  localStorage.clear()
-  return <Register />
 }
 
 const router = createBrowserRouter([
@@ -26,10 +20,10 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       {
-        path: "admin",
+        path: "pe",
         element: <ProtectedRoute><Outlet /></ProtectedRoute>,
         children: [
-          { index: true, element: <PEHome /> },
+          { path: "schema", element: <Schema /> },
           { path: "schema/:schemaId", element: <EditSchema /> },
         ],
       },
@@ -37,7 +31,6 @@ const router = createBrowserRouter([
   },
   { path: "/login", element: <Login /> },
   { path: "/logout", element: <Logout /> },
-  { path: "/register", element: <RegisterAndLogout /> },
   { path: "*", element: <NotFound /> },
 ]);
 

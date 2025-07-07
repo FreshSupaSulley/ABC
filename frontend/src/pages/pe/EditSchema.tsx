@@ -27,7 +27,7 @@ function EditSchema() {
         }).then((res) => {
             if (res.status === 204) {
                 alert("Schema deleted");
-                navigation("/admin");
+                navigation("/pe");
             } else {
                 alert("Failed to delete schema.");
             }
@@ -46,7 +46,7 @@ function EditSchema() {
     return (
         <Box sx={{ width: '100%', maxWidth: 1000, my: 5, alignItems: 'center' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigation("/admin", { viewTransition: true })}>
+                <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigation("/pe/schema", { viewTransition: true })}>
                     Back
                 </Button>
                 {/* Title */}

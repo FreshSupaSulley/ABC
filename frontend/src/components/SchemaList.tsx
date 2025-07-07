@@ -6,12 +6,15 @@ import { useMemo, useState } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 import { useNavigate } from 'react-router-dom';
 import { SchemaType } from '../pages/pe/EditSchema';
+import { ACCESS_TOKEN } from '../constants';
 
 type SchemaListProps = {
     schemas: SchemaType[];
 };
 
 const SchemaList: React.FC<SchemaListProps> = ({ schemas }) => {
+    // If you're logged in (admin), clicking will reveal the manage page
+    const loggedIn = !!localStorage.getItem(ACCESS_TOKEN);
     const [search, setSearch] = useState("");
     const navigate = useNavigate();
 
@@ -25,7 +28,7 @@ const SchemaList: React.FC<SchemaListProps> = ({ schemas }) => {
         <Box>
             <TextField
                 fullWidth
-                label="Search schemas"
+                label="Filter"
                 variant="outlined"
                 size="small"
                 margin="normal"
@@ -37,7 +40,7 @@ const SchemaList: React.FC<SchemaListProps> = ({ schemas }) => {
                 data={filteredSchemas}
                 itemContent={(index, schema) => (
                     <ListItem key={index} disablePadding>
-                        <ListItemButton onClick={() => navigate(`/admin/schema/${schema.name}`, { viewTransition: true })}>
+                        <ListItemButton onClick={() => navigate(`${loggedIn ? '/pe' : ''}/schema/${schema.name}`, { viewTransition: true })}>
                             <ListItemText
                                 primary={schema.name}
                                 secondary={schema.description}

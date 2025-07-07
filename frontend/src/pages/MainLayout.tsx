@@ -7,8 +7,10 @@ import { Outlet, useLocation, useNavigation } from 'react-router-dom';
 import StyledLink from '../components/StyledLink';
 import { LinearProgress } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
+import { ACCESS_TOKEN } from '../constants';
 
 function MainLayout() {
+    const loggedIn = !!localStorage.getItem(ACCESS_TOKEN);
     const { state } = useNavigation();
     const location = useLocation();
     const prevLocation = useRef(location.pathname);
@@ -42,8 +44,12 @@ function MainLayout() {
                             </Box>
                         </Box>
                         <Box sx={{ display: 'flex', gap: 2 }}>
-                            <StyledLink to='admin' label='Admin' variant='outlined' />
-                            <StyledLink to='login' label='Login' variant='contained' />
+                            {/* Only show these if logged in */}
+                            {loggedIn && <>
+                                <StyledLink to='/pe/schema' label='Schemas' variant='outlined' />
+                                <StyledLink to='/pe/product' label='Products' variant='outlined' />
+                            </>}
+                            <StyledLink to={loggedIn ? 'logout' : 'login'} label={loggedIn ? 'Logout' : 'Login'} variant='contained' />
                         </Box>
                     </Toolbar>
                 </Container>

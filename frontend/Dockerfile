@@ -1,27 +1,11 @@
-# Base Stage
-FROM node:14 AS base
-
-# Set the working directory
+# Build stage
+FROM node:14 AS build
 WORKDIR /app
-
-# Copy package files and install dependencies
-COPY package.json package-lock.json ./
+COPY package*.json ./
 RUN npm install
-
-# Copy the entire application code to the container
 COPY . .
-
-# Build the application
-FROM base AS build
 RUN npm run build
 
-# Use an Nginx image to serve the frontend
-FROM nginx:alpine
-# Copy build output to nginx directory
+# Serve stage
+FROM nginx:alpine AS static
 COPY --from=build /app/build /usr/share/nginx/html
-
-# Expose the port NGINX runs on
-EXPOSE 80
-
-# Start NGINX server
-CMD ["nginx", "-g", "daemon off;"]

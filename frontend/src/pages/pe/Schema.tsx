@@ -47,7 +47,7 @@ function Home() {
             name, description,
         }).then((res) => {
             if (res.status === 201) {
-                navigation(`/pe/schema/${res.data.name}`);
+                navigation(`/pe/schema/${res.data.name}`, { viewTransition: true });
             } else {
                 alert("Failed to create schema");
             }
@@ -57,8 +57,8 @@ function Home() {
     return (
         <Box sx={{ width: '100%', maxWidth: 1000, my: 5 }}>
             {/* Title */}
-            <Typography variant="h3">
-                Admin Panel
+            <Typography variant="h4">
+                Manage Schema
             </Typography>
 
             <Accordion>
