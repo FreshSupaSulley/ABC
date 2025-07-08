@@ -7,6 +7,9 @@ import EditSchema from "./pages/pe/EditSchema";
 import Home from "./pages/Home";
 import Schema from "./pages/pe/Schema";
 import Login from "./pages/Login";
+import EditProduct from "./pages/pe/EditProduct";
+import Product from "./pages/pe/Product";
+import Build from "./pages/Build";
 
 function Logout() {
   localStorage.clear()
@@ -23,10 +26,15 @@ const router = createBrowserRouter([
         path: "pe",
         element: <ProtectedRoute><Outlet /></ProtectedRoute>,
         children: [
+          // Product
+          { path: "product", element: <Product /> },
+          { path: "product/:productId", element: <EditProduct /> },
+          // Schema
           { path: "schema", element: <Schema /> },
           { path: "schema/:schemaId", element: <EditSchema /> },
         ],
       },
+      { path: "build/:schemaId", element: <Build /> },
     ],
   },
   { path: "/login", element: <Login /> },

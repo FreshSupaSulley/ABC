@@ -6,73 +6,55 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import YamlEditor from "../../components/YamlEditor";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-export type QuestionType = 'integer' | 'boolean' | 'enum';
-
-export interface ProcessedQuestion {
-    name: string;
-    type: QuestionType;
-    prompt: string;
-    default: number | boolean | string;
-    choices?: (string | number)[];
+export interface ProductType {
+    sku: string;
+    description?: string;
+    classification: 'hardware' | 'software' | 'a-care' | 'cvp' | 'licenses';
+    gpl_price?: number;
 }
 
-export interface SchemaType {
-    name: string;
-    description: string;
-    yaml: string;
-    questions: ProcessedQuestion[];
-}
-
-function EditSchema() {
+function EditProduct() {
     const navigation = useNavigate();
-    const { schemaId } = useParams();
-    const [schema, setSchema] = useState<SchemaType | null>(null);
+    const { productId } = useParams();
+    const [product, setProduct] = useState<ProductType | null>(null);
 
     // Deletion modal
     const [open, setOpen] = useState(false);
     const handleDelete = () => {
         // Close dialog
         setOpen(false);
-        api.delete(`/api/schema/delete/${schemaId}`).then((res) => {
+        fetch(`/api/product/delete/${productId}`, {
+            method: "DELETE",
+        }).then((res) => {
             if (res.status === 204) {
-                navigation("/pe/schema");
+                alert("Product deleted");
+                navigation("/pe");
             } else {
-                alert("Failed to delete schema.");
+                alert("Failed to delete product.");
             }
         });
     };
 
-    const saveScript = (script: string) => {
-        // Close dialog
-        setOpen(false);
-        api.patch(`/api/schema/${schemaId}`, { yaml: script }).then((res) => {
-            alert("saved");
-        }).catch(e => {
-            alert("Failed to save schema");
-            console.error(e);
-        });
-    };
-
     useEffect(() => {
-        api.get<SchemaType>(`/api/schema/${schemaId}`)
+        api.get<ProductType>(`/api/product/${productId}`)
             .then((res) => res.data)
             .then((data) => {
                 console.log(data);
-                setSchema(data);
+                setProduct(data);
             }).catch((err) => alert(err));
-    }, [schemaId]);
+    }, [productId]);
 
     return (
         <Box sx={{ width: '100%', maxWidth: 1000, my: 5, alignItems: 'center' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigation("/pe/schema", { viewTransition: true })}>
+                <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigation("/pe/product", { viewTransition: true })}>
                     Back
                 </Button>
                 {/* Title */}
                 <Typography variant="h3" sx={{ textAlign: 'center' }}>
-                    {schemaId}
+                    {productId}
                 </Typography>
-                <Button variant="contained" color="error" startIcon={<DeleteIcon />} onClick={() => setOpen(true)}>
+                <Button variant="contained" color="error" startIcon={<DeleteIcon />}>
                     Delete
                 </Button>
             </Box>
@@ -81,10 +63,10 @@ function EditSchema() {
                 <TextField label="Description" variant="standard" fullWidth />
             </Box>
             <Dialog open={open} onClose={() => setOpen(false)}>
-                <DialogTitle>Delete Schema?</DialogTitle>
+                <DialogTitle>Delete Product?</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Are you sure you want to delete this schema? This action cannot be undone.
+                        Are you sure you want to delete this product? This action cannot be undone.
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -96,10 +78,8 @@ function EditSchema() {
                     </Button>
                 </DialogActions>
             </Dialog>
-            {/* Meat of ABC */}
-            {!schema?.yaml ? <p>Loading...</p> : <YamlEditor script={schema.yaml} onSave={(script) => saveScript(script)} />}
         </Box>
     );
 }
 
-export default EditSchema;
+export default EditProduct;

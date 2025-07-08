@@ -14,7 +14,7 @@ function MainLayout() {
     const { state } = useNavigation();
     const location = useLocation();
     const prevLocation = useRef(location.pathname);
-    const [direction, setDirection] = useState('left'); // default swipe left
+    const [direction, setDirection] = useState('right');
 
     useEffect(() => {
         if (location.pathname !== prevLocation.current) {

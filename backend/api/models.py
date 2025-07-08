@@ -1,5 +1,42 @@
+import yaml
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.core.validators import RegexValidator
+import textwrap
+
+DEFAULT_YAML = textwrap.dedent("""questions:
+- name: num_racks
+  type: integer
+  prompt: "How many racks?"
+  default: 2
+
+- name: include_mgmt_aggs
+  type: boolean
+  prompt: "Include management AGGs?"
+  default: false
+
+- name: support_years
+  type: enum
+  prompt: "How many years of support?"
+  choices: [1, 3, 5]
+  default: 3
+
+rules:
+- condition: "num_racks > 2"
+  add:
+    product: "DCS-7280CR3A-48D6-R"
+    quantity: "num_racks * 2"
+
+- condition: "include_mgmt_aggs == true"
+  add:
+    product: "MGMT-AGG-SWITCH"
+    quantity: 1
+
+- condition: "support_years == 5"
+  add:
+    product: "A-Care-5YR"
+    quantity: "num_racks * 2"
+""")
 
 class Schema(models.Model):
     name = models.CharField(
@@ -15,8 +52,33 @@ class Schema(models.Model):
         ]
     )
     description = models.TextField(max_length=200)
-    yaml = models.TextField(default="")
+    yaml = models.TextField(default=DEFAULT_YAML)
+    parsed_questions = models.JSONField(default=list, blank=True) # store the questions too. Updates when YAML does
     
+    def clean(self):
+        # Validate YAML format and structure
+        try:
+            parsed = yaml.safe_load(self.yaml_text)
+        except yaml.YAMLError as e:
+            raise ValidationError({'yaml_text': f"Invalid YAML: {str(e)}"})
+
+        if not isinstance(parsed, dict) or 'questions' not in parsed:
+            raise ValidationError({'yaml_text': "YAML must contain a 'questions' key."})
+
+        questions = parsed['questions']
+        if not isinstance(questions, list):
+            raise ValidationError({'yaml_text': "'questions' must be a list."})
+
+        for i, q in enumerate(questions):
+            if not isinstance(q, dict):
+                raise ValidationError({'yaml_text': f"Question at index {i} is not a dict."})
+            for field in ['name', 'type', 'prompt']:
+                if field not in q:
+                    raise ValidationError({'yaml_text': f"Missing '{field}' in question at index {i}."})
+
+        # If we get here, YAML is valid
+        self.parsed_questions = questions
+
     def __str__(self):
         return self.name
 
@@ -35,11 +97,6 @@ class Product(models.Model):
     description = models.TextField(
         blank=True,
         help_text="Description"
-    )
-    gpl = models.CharField(
-        max_length=20,
-        default='pcs',
-        help_text="Unit of measure (e.g., pcs, kg, m)"
     )
     classification = models.CharField(
         max_length=20,

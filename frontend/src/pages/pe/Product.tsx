@@ -1,25 +1,24 @@
-import StyledLink from "../../components/StyledLink";
 import { useEffect, useState } from "react";
 import api from "../../api";
 import { Accordion, AccordionActions, AccordionDetails, AccordionSummary, Box, Button, ListItemText, TextField, Typography } from "@mui/material";
-import { Add, ExpandMore } from "@mui/icons-material";
-import { Navigate, useNavigate } from "react-router-dom";
-import { SchemaType } from "./EditSchema";
+import { ExpandMore } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 import ItemList from "../../components/ItemList";
+import { ProductType } from "./EditProduct";
 
-function Home() {
-    const [schemas, setSchemas] = useState<SchemaType[]>([]);
+export default function Product() {
+    const [products, setProducts] = useState<ProductType[]>([]);
 
     useEffect(() => {
-        getSchemas();
+        getNotes();
     }, []);
 
-    const getSchemas = () => {
-        api.get<SchemaType[]>("/api/schema")
+    const getNotes = () => {
+        api.get<ProductType[]>("/api/product")
             .then((res) => res.data)
             .then((data) => {
                 console.log(data);
-                setSchemas(data);
+                setProducts(data);
             }).catch((err) => alert(err));
     };
 
@@ -34,22 +33,24 @@ function Home() {
     //         .catch((err) => alert(err));
     // };
 
-    const [name, setName] = useState("");
+    const [sku, setSKU] = useState("");
     const [description, setDescription] = useState("");
+    const [classification, setClassification] = useState("");
+    const [gpl, setPrice] = useState("");
     const navigation = useNavigate();
 
     const handleCreate = () => {
-        if (!name || !description) {
+        if (!sku || !description) {
             alert("Please fill out both fields.");
             return;
         }
-        api.post("/api/schema/create", {
-            name, description,
+        api.post("/api/product/create", {
+            sku, description, classification, gpl
         }).then((res) => {
             if (res.status === 201) {
-                navigation(`/pe/schema/${res.data.name}`, { viewTransition: true });
+                navigation(`/pe/product/${res.data.name}`, { viewTransition: true });
             } else {
-                alert("Failed to create schema");
+                alert("Failed to create product");
             }
         }).catch((err) => alert(err));
     };
@@ -58,7 +59,7 @@ function Home() {
         <Box sx={{ width: '100%', maxWidth: 1000, my: 5 }}>
             {/* Title */}
             <Typography variant="h4">
-                Manage Schema
+                Manage Products
             </Typography>
 
             <Accordion>
@@ -66,33 +67,32 @@ function Home() {
                     expandIcon={<ExpandMore />}
                     aria-controls="panel3-content"
                     id="panel3-header">
-                    <Typography component="span">Create Schema</Typography>
+                    <Typography component="span">Create Product</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <Box sx={{ display: 'flex', gap: 2 }}>
-                        <TextField required fullWidth label="Name" variant="standard" value={name} onChange={e => setName(e.target.value)} />
+                        <TextField required fullWidth label="SKU (name)" variant="standard" value={sku} onChange={e => setSKU(e.target.value)} />
                         <TextField required fullWidth label="Description" variant="standard" value={description} onChange={e => setDescription(e.target.value)} />
+                        <TextField required fullWidth label="Classification" variant="standard" value={classification} onChange={e => setClassification(e.target.value)} />
+                        <TextField required fullWidth label="GPL (price)" variant="standard" value={gpl} onChange={e => setPrice(e.target.value)} />
                     </Box>
                 </AccordionDetails>
                 <AccordionActions>
                     <Button variant="contained" onClick={handleCreate}>Create</Button>
                 </AccordionActions>
             </Accordion>
-
             {/* Show schema list */}
             <ItemList
-                items={schemas}
-                getItemUrl={(schema) => `/pe/schema/${schema.name}`}
-                getFilterKey={(item) => item.name}
-                renderItem={(schema) => (
+                items={products}
+                getItemUrl={(product) => `/pe/product/${product.sku}`}
+                getFilterKey={(item) => item.sku}
+                renderItem={(product) => (
                     <ListItemText
-                        primary={schema.name}
-                        secondary={schema.description}
+                        primary={product.sku}
+                        secondary={product.description}
                     />
                 )}
             />
         </Box>
     );
 }
-
-export default Home;
