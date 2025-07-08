@@ -1,8 +1,10 @@
-import { Button, ListItemText } from "@mui/material";
+import { Box, Button, ListItemText, Typography } from "@mui/material";
 import ItemList from "../components/ItemList";
 import { useState, useEffect } from "react";
 import api from "../api";
 import { SchemaType } from "./pe/EditSchema";
+import BigBox from "../components/BigBox";
+import PageTitle from "../components/PageTitle";
 
 export default function DrawerAppBar() {
     const [schemas, setSchemas] = useState<SchemaType[]>([]);
@@ -12,7 +14,7 @@ export default function DrawerAppBar() {
     }, []);
 
     const getSchemas = () => {
-        api.get<SchemaType[]>("/api/schema")
+        api.get<SchemaType[]>("/api/schema/")
             .then((res) => res.data)
             .then((data) => {
                 console.log(data);
@@ -21,9 +23,9 @@ export default function DrawerAppBar() {
     };
 
     return (
-        <div>
-            <h1>Generate a BOM</h1>
-            <p>Select the network schema to generate a BOM for:</p>
+        <BigBox>
+            <PageTitle title="Generate a BOM" />
+            <p>Select the network schema to generate a BOM for below:</p>
 
             {/* Show schema list */}
             <ItemList
@@ -37,6 +39,6 @@ export default function DrawerAppBar() {
                     />
                 )}
             />
-        </div>
+        </BigBox>
     );
 }

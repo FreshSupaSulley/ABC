@@ -20,6 +20,7 @@
     "@types/react-dom": "^19.1.6",
     "@uiw/react-codemirror": "^4.23.12",
     "axios": "^1.10.0",
+    "axios-auth-refresh": "^3.3.6",
     "expr-eval": "^2.0.2",
     "framer-motion": "^12.23.0",
     "jwt-decode": "^4.0.0",

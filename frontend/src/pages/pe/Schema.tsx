@@ -1,11 +1,13 @@
 import StyledLink from "../../components/StyledLink";
 import { useEffect, useState } from "react";
 import api from "../../api";
-import { Accordion, AccordionActions, AccordionDetails, AccordionSummary, Box, Button, ListItemText, TextField, Typography } from "@mui/material";
+import { Accordion, AccordionActions, AccordionDetails, AccordionSummary, Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, ListItemText, Snackbar, TextField, Typography } from "@mui/material";
 import { Add, ExpandMore } from "@mui/icons-material";
 import { Navigate, useNavigate } from "react-router-dom";
 import { SchemaType } from "./EditSchema";
 import ItemList from "../../components/ItemList";
+import BigBox from "../../components/BigBox";
+import PageTitle from "../../components/PageTitle";
 
 function Home() {
     const [schemas, setSchemas] = useState<SchemaType[]>([]);
@@ -36,13 +38,16 @@ function Home() {
 
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
+    const [missingFields, setMissingFields] = useState<boolean>(false);
     const navigation = useNavigate();
+    const [open, setOpen] = useState(false);
 
     const handleCreate = () => {
         if (!name || !description) {
-            alert("Please fill out both fields.");
+            setMissingFields(true);
             return;
         }
+        setMissingFields(false); // safety net
         api.post("/api/schema/create", {
             name, description,
         }).then((res) => {
@@ -55,29 +60,40 @@ function Home() {
     };
 
     return (
-        <Box sx={{ width: '100%', maxWidth: 1000, my: 5 }}>
-            {/* Title */}
-            <Typography variant="h4">
-                Manage Schema
-            </Typography>
-
-            <Accordion>
-                <AccordionSummary
-                    expandIcon={<ExpandMore />}
-                    aria-controls="panel3-content"
-                    id="panel3-header">
-                    <Typography component="span">Create Schema</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <Box sx={{ display: 'flex', gap: 2 }}>
-                        <TextField required fullWidth label="Name" variant="standard" value={name} onChange={e => setName(e.target.value)} />
-                        <TextField required fullWidth label="Description" variant="standard" value={description} onChange={e => setDescription(e.target.value)} />
-                    </Box>
-                </AccordionDetails>
-                <AccordionActions>
-                    <Button variant="contained" onClick={handleCreate}>Create</Button>
-                </AccordionActions>
-            </Accordion>
+        <BigBox sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                {/* Title */}
+                <PageTitle title="Manage Schemas" />
+                {/* Create schema */}
+                <Button variant='contained' onClick={() => setOpen(true)}>
+                    New Schema
+                </Button>
+                <Dialog open={open} onClose={() => setOpen(false)}>
+                    <Snackbar open={missingFields} onClose={() => setMissingFields(false)} autoHideDuration={3000} message="Fill out both fields" anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                        <Alert severity="warning" variant="filled">
+                            Both fields are required
+                        </Alert>
+                    </Snackbar>
+                    <DialogTitle>Create Schema</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            You'll be navigated to the edit screen after creation.
+                        </DialogContentText>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, marginTop: 1 }}>
+                            <TextField required fullWidth label="Name" variant="standard" value={name} onChange={e => setName(e.target.value)} />
+                            <TextField required fullWidth label="Description" variant="standard" value={description} onChange={e => setDescription(e.target.value)} />
+                        </Box>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setOpen(false)} color="inherit">
+                            Cancel
+                        </Button>
+                        <Button onClick={handleCreate} color="primary">
+                            Create
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </Box>
 
             {/* Show schema list */}
             <ItemList
@@ -91,7 +107,7 @@ function Home() {
                     />
                 )}
             />
-        </Box>
+        </BigBox>
     );
 }
 

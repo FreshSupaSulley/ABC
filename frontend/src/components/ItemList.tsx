@@ -1,12 +1,14 @@
 import * as React from 'react';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import { Box, List, ListItemButton, TextField } from '@mui/material';
+import { Box, Card, CardContent, List, ListItemButton, TextField, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 import { useNavigate } from 'react-router-dom';
 import { SchemaType } from '../pages/pe/EditSchema';
 import { ACCESS_TOKEN } from '../constants';
+import { color } from 'framer-motion';
+import { BorderColor } from '@mui/icons-material';
 
 type ListProps<T> = {
     items: T[];
@@ -41,6 +43,20 @@ export default function ItemList<T>({ items, renderItem, getItemUrl, getFilterKe
             <Virtuoso
                 style={{ height: 400, width: "100%" }}
                 data={filteredItems}
+                components={{
+                    EmptyPlaceholder: () => {
+                        return (
+                            <Card>
+                                <CardContent>
+                                    {/* By default it's body1 variant that's also a p tag */}
+                                    <Typography textAlign='center'>
+                                        No results
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        );
+                    }
+                }}
                 itemContent={(index, item) => {
                     const content = renderItem(item, index);
                     const url = getItemUrl ? getItemUrl(item) : undefined;

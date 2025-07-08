@@ -1,13 +1,16 @@
-import { Navigate, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { jwtDecode } from "jwt-decode"
 import api from "../api"
 import { REFRESH_TOKEN, ACCESS_TOKEN } from "../constants"
 import { useState, useEffect } from "react"
+import { Box } from '@mui/material';
+import { Outlet } from "react-router-dom";
+import ABCBar from "./ABCBar"
 
 // Sends the user to the login screen if they're not authorized
-function ProtectedRoute({ children }) {
+function AdminRoute() {
     const navigator = useNavigate();
-    const [isAuthorized, setIsAuthorized] = useState(null);
+    const [isAuthorized, setIsAuthorized] = useState(false);
 
     useEffect(() => {
         auth().catch(() => setIsAuthorized(false))
@@ -39,7 +42,7 @@ function ProtectedRoute({ children }) {
         const tokenExpiration = decoded.exp;
         const now = Date.now() / 1000;
 
-        if (tokenExpiration < now) {
+        if (!!tokenExpiration && tokenExpiration < now) {
             await refreshToken();
         } else {
             setIsAuthorized(true);
@@ -47,13 +50,20 @@ function ProtectedRoute({ children }) {
     };
 
     if (isAuthorized !== true) {
-        if(isAuthorized === false) {
-            console.log("NAVIGATING");
+        if (isAuthorized === false) {
             navigator("/login", { viewTransition: true });
         }
         return <div>Authenticating...</div>
     }
-    return children;
+    return (
+        <>
+            <ABCBar />
+            {/* Page Content with animation */}
+            <Box component="div" sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', px: 10 }}>
+                <Outlet />
+            </Box>
+        </>
+    );
 }
 
-export default ProtectedRoute
+export default AdminRoute

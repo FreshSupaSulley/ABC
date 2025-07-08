@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import api from "../../api";
-import { Accordion, AccordionActions, AccordionDetails, AccordionSummary, Box, Button, ListItemText, TextField, Typography } from "@mui/material";
+import { Accordion, AccordionActions, AccordionDetails, AccordionSummary, Box, Button, Divider, ListItemText, TextField, Typography } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import ItemList from "../../components/ItemList";
 import { ProductType } from "./EditProduct";
+import BigBox from "../../components/BigBox";
 
 export default function Product() {
     const [products, setProducts] = useState<ProductType[]>([]);
@@ -56,12 +57,11 @@ export default function Product() {
     };
 
     return (
-        <Box sx={{ width: '100%', maxWidth: 1000, my: 5 }}>
+        <BigBox>
             {/* Title */}
             <Typography variant="h4">
                 Manage Products
             </Typography>
-
             <Accordion>
                 <AccordionSummary
                     expandIcon={<ExpandMore />}
@@ -93,6 +93,6 @@ export default function Product() {
                     />
                 )}
             />
-        </Box>
+        </BigBox>
     );
 }

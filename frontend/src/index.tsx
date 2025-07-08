@@ -2,22 +2,34 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import { ThemeProvider } from '@emotion/react';
-import { createTheme, CssBaseline } from '@mui/material';
+import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
 // Create a custom theme
-const theme = createTheme({
+export const theme = createTheme({
+  typography: {
+    fontFamily: 'system-ui'
+  },
   palette: {
+    // I'll just force dark theme ig
     mode: 'dark',
     primary: {
-      main: '#3f51b5',
+      main: '#FF6600',
+      contrastText: '#ffffff',
     },
     secondary: {
       main: '#f50057',
+    },
+    warning: {
+      main: '#ff9800',
+      contrastText: '#ffffff',
+    },
+    success: {
+      main: '#4caf50',
+      contrastText: '#ffffff',
     },
   },
 });

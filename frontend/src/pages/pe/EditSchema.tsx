@@ -5,6 +5,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import DeleteIcon from "@mui/icons-material/Delete";
 import YamlEditor from "../../components/YamlEditor";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import BigBox from "../../components/BigBox";
+import PageTitle from "../../components/PageTitle";
+import { Build, Hardware } from "@mui/icons-material";
 
 export type QuestionType = 'integer' | 'boolean' | 'enum';
 
@@ -63,22 +66,23 @@ function EditSchema() {
     }, [schemaId]);
 
     return (
-        <Box sx={{ width: '100%', maxWidth: 1000, my: 5, alignItems: 'center' }}>
+        <BigBox>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigation("/pe/schema", { viewTransition: true })}>
                     Back
                 </Button>
                 {/* Title */}
-                <Typography variant="h3" sx={{ textAlign: 'center' }}>
-                    {schemaId}
-                </Typography>
+                <PageTitle title={schemaId + ""} />
                 <Button variant="contained" color="error" startIcon={<DeleteIcon />} onClick={() => setOpen(true)}>
                     Delete
                 </Button>
             </Box>
-            {/* Delete */}
+            {/* Main content */}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start', my: 2 }}>
                 <TextField label="Description" variant="standard" fullWidth />
+                <Button variant="outlined" startIcon={<Hardware />} onClick={() => navigation(`/build/${schemaId}`, { viewTransition: true })}>
+                    Generate BOM
+                </Button>
             </Box>
             <Dialog open={open} onClose={() => setOpen(false)}>
                 <DialogTitle>Delete Schema?</DialogTitle>
@@ -98,7 +102,7 @@ function EditSchema() {
             </Dialog>
             {/* Meat of ABC */}
             {!schema?.yaml ? <p>Loading...</p> : <YamlEditor script={schema.yaml} onSave={(script) => saveScript(script)} />}
-        </Box>
+        </BigBox>
     );
 }
 
