@@ -1,0 +1,47 @@
+# Inspiration:
+# https://github.com/codingforinnovations/django-react-postgres/blob/main/docker-compose.yaml
+version: '3'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: password
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  backend:
+    image: fmk.nexus-ci.onefiserv.net/apm/0011564/approved-bom-catalog:latest # this should be renamed to abc-backend, but in order to do that you need to change the CI/CD vars and I'm not the owner of the repos so I can't
+    # see this for updating the CI/CD (an owner needs to do this):
+    # https://enterprise-confluence.onefiserv.net/pages/viewpage.action?pageId=779447099#id-%2522APM%2522Number'Tagging'forGitlab%2522App%2522Groups%2CSubgroups%2C&Projects-ITAppOwners&Delegates:Review&Update%2522APM%2522CI-CDVariableValuesforAllGitLab%2522App%2522Groups-startingJune2025
+    environment:
+      - POSTGRES_DB=appdb
+      - POSTGRES_USER=appuser
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST=db
+    ports:
+      - "8000:8000"
+    volumes:
+      - bstatic:/usr/src/app/bstatic # nginx needs to be able to find Django's static resources for the admin page
+    depends_on:
+      - db
+
+  frontend:
+    image: fmk.nexus-ci.onefiserv.net/apm/0011564/abc-frontend:latest
+
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - bstatic:/usr/src/app/bstatic
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  db-data:
+  bstatic:

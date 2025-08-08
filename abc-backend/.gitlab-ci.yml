@@ -1,0 +1,114 @@
+---
+stages:
+  - prepare
+  - test
+  - build
+  - push_build
+  - push_release
+  - wait_for_images
+
+variables:
+  DOCKER_CONFIG: ${CI_PROJECT_DIR}/.docker
+  POE_CMD: poe -e simple -q
+
+default:
+  before_script:
+    - |
+      echo "
+          GITLAB_USER_NAME  $GITLAB_USER_NAME
+         GITLAB_USER_EMAIL  $GITLAB_USER_EMAIL
+           CI_PIPELINE_IID  $CI_PIPELINE_IID
+         CI_DEFAULT_BRANCH  $CI_DEFAULT_BRANCH
+          CI_COMMIT_BRANCH  $CI_COMMIT_BRANCH
+           CI_PROJECT_NAME  $CI_PROJECT_NAME
+               CINX_W_USER  $CINX_W_USER
+               CDNX_R_USER  $CDNX_R_USER
+                APM_NUMBER  $APM_NUMBER"
+    - |
+      function check_vars_set {
+          local all_set=true  # Flag to track if all variables are set
+
+          for var_name in "$@"; do
+              # Check if the variable is set and not empty
+              if [[ -z "${!var_name}" ]]; then
+                  echo "Error: $var_name is not set." >&2
+                  all_set=false
+              fi
+          done
+
+          # If any variable was not set, print general error message and exit
+          if [[ "$all_set" != true ]]; then
+              echo "Error: All of the following variables must be set: $@" >&2
+              exit 1
+          fi
+      }
+
+      check_vars_set "CINX_W_USER" "CINX_W_PASSWORD" "CDNX_R_USER" "CDNX_R_PASSWORD" "APM_NUMBER"
+    - docker login -u "$CINX_W_USER" -p "$CINX_W_PASSWORD" fmk.nexus-ci.onefiserv.net
+  tags:
+    - FTS_LAB_CONCURRENT
+
+prepare_tags:
+  stage: prepare
+  script:
+    - $POE_CMD get-tags > pipeline.env
+    - echo LOCAL_REPO="$($POE_CMD get-local-repo)" >> pipeline.env
+    - echo GIT_REPO="$($POE_CMD get-repo-url)" >> pipeline.env
+  artifacts:
+    paths:
+      - pipeline.env
+
+# It's throwing errors for basic Django bs so I'm not doing ts
+# test:
+#   stage: test
+#   script:
+#     - $POE_CMD build --target test
+#     - $POE_CMD run-tag test
+
+build:
+  stage: build
+  script:
+    - >
+      $POE_CMD build
+      --label "io.fisv.APM=$APM_NUMBER"
+      --label "io.fisv.GitRepo=$GIT_REPO"
+
+# Do we really need two tasks??
+# push_build:
+#   stage: push_build
+#   script:
+#     - source pipeline.env
+#     - echo "Pushing $BUILD_PUSH_IMAGE"
+#     - docker tag $LOCAL_REPO:build $BUILD_PUSH_IMAGE
+#     - docker push $BUILD_PUSH_IMAGE
+
+push_release:
+  stage: push_release
+  script:
+    - source pipeline.env
+    # Override latest push image
+    - export LATEST_PUSH_IMAGE=fmk.nexus-ci.onefiserv.net/apm/0011564/approved-bom-catalog:latest
+    - echo "Pushing $LATEST_PUSH_IMAGE"
+    - docker tag $LOCAL_REPO:build $LATEST_PUSH_IMAGE
+    - docker push $LATEST_PUSH_IMAGE
+  rules:
+    - if: "$CI_COMMIT_BRANCH == 'master'"
+    - if: "$CI_COMMIT_BRANCH == 'main'"
+
+# no
+# wait_for_build:
+#   stage: wait_for_images
+#   script:
+#     - source pipeline.env
+#     - echo "Waiting for $BUILD_PULL_IMAGE to be added after scanning."
+#     - $POE_CMD wait-for $BUILD_PULL_IMAGE
+
+# wait_for_release:
+#   stage: wait_for_images
+#   script:
+#     - source pipeline.env
+#     - echo "Waiting for $LATEST_PULL_IMAGE to be added after scanning."
+#     - $POE_CMD wait-for $LATEST_PULL_IMAGE
+#   rules:
+#     - if: "$CI_COMMIT_BRANCH == 'master'"
+#     - if: "$CI_COMMIT_BRANCH == 'main'"

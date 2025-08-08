@@ -1,0 +1,108 @@
+---
+stages:
+  - build
+
+variables:
+  DOCKER_CONFIG: ${CI_PROJECT_DIR}/.docker
+
+default:
+  before_script:
+    - |
+      echo "
+          GITLAB_USER_NAME  $GITLAB_USER_NAME
+         GITLAB_USER_EMAIL  $GITLAB_USER_EMAIL
+           CI_PIPELINE_IID  $CI_PIPELINE_IID
+         CI_DEFAULT_BRANCH  $CI_DEFAULT_BRANCH
+          CI_COMMIT_BRANCH  $CI_COMMIT_BRANCH
+           CI_PROJECT_NAME  $CI_PROJECT_NAME
+               CINX_W_USER  $CINX_W_USER
+               CDNX_R_USER  $CDNX_R_USER
+                APM_NUMBER  $APM_NUMBER"
+    - |
+      function check_vars_set {
+          local all_set=true  # Flag to track if all variables are set
+
+          for var_name in "$@"; do
+              # Check if the variable is set and not empty
+              if [[ -z "${!var_name}" ]]; then
+                  echo "Error: $var_name is not set." >&2
+                  all_set=false
+              fi
+          done
+
+          # If any variable was not set, print general error message and exit
+          if [[ "$all_set" != true ]]; then
+              echo "Error: All of the following variables must be set: $@" >&2
+              exit 1
+          fi
+      }
+
+      check_vars_set "CINX_W_USER" "CINX_W_PASSWORD" "CDNX_R_USER" "CDNX_R_PASSWORD" "APM_NUMBER"
+    - docker login -u "$CINX_W_USER" -p "$CINX_W_PASSWORD" fmk.nexus-ci.onefiserv.net
+  tags:
+    - FTS_LAB_CONCURRENT
+
+build:
+  stage: build
+  script:
+      # Use custom timestamp so tags don't clash
+    - export TIMESTAMP=$(date +%Y.%m.%d.%H.%M)
+    - export FRONTEND_PUSH_IMAGE="fmk.nexus-ci.onefiserv.net/apm/$APM_NUMBER/$CI_PROJECT_NAME:latest"
+    - echo "Pushing to $FRONTEND_PUSH_IMAGE"
+    # Builds the docker image with the "frontend" tag at the build context of the current dir (.)
+    - docker build -t frontend .
+    - docker tag frontend:latest $FRONTEND_PUSH_IMAGE
+    - docker push $FRONTEND_PUSH_IMAGE
+  rules:
+    - if: "$CI_COMMIT_BRANCH == 'master'"
+    - if: "$CI_COMMIT_BRANCH == 'main'"
+
+# test:
+#   stage: test
+#   script:
+#     - $POE_CMD build --target test
+#     - $POE_CMD run-tag test
+
+# build:
+#   stage: build
+#   script:
+#     - >
+#       $POE_CMD build
+#       --label "io.fisv.APM=$APM_NUMBER"
+#       --label "io.fisv.GitRepo=$GIT_REPO"
+
+# push_build:
+#   stage: push_build
+#   script:
+#     - source pipeline.env
+#     - echo "Pushing $BUILD_PUSH_IMAGE"
+#     - docker tag $LOCAL_REPO:build $BUILD_PUSH_IMAGE
+#     - docker push $BUILD_PUSH_IMAGE
+
+# push_release:
+#   stage: push_release
+#   script:
+#     - source pipeline.env
+#     - echo "Pushing $LATEST_PUSH_IMAGE"
+#     - docker tag $LOCAL_REPO:build $LATEST_PUSH_IMAGE
+#     - docker push $LATEST_PUSH_IMAGE
+#   rules:
+#     - if: "$CI_COMMIT_BRANCH == 'master'"
+#     - if: "$CI_COMMIT_BRANCH == 'main'"
+
+# wait_for_build:
+#   stage: wait_for_images
+#   script:
+#     - source pipeline.env
+#     - echo "Waiting for $BUILD_PULL_IMAGE to be added after scanning."
+#     - $POE_CMD wait-for $BUILD_PULL_IMAGE
+
+# wait_for_release:
+#   stage: wait_for_images
+#   script:
+#     - source pipeline.env
+#     - echo "Waiting for $LATEST_PULL_IMAGE to be added after scanning."
+#     - $POE_CMD wait-for $LATEST_PULL_IMAGE
+#   rules:
+#     - if: "$CI_COMMIT_BRANCH == 'master'"
+#     - if: "$CI_COMMIT_BRANCH == 'main'"

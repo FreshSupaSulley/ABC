@@ -1,0 +1,92 @@
+[tool.poetry]
+package-mode = false
+name = "abc-backend"
+version = "0.1.0"
+description = "Approved BOM Catalog"
+authors = ["Erich Boschert <erich.boschert@fiserv.com>"]
+
+[tool.poetry.dependencies]
+# When changing the python version change the get-tags task in the poe section to match.
+python = "~3.12"
+gitpython = "^3.1.44"
+pyyaml = "^6.0.2"
+django = "^5.2.3"
+pyjwt = "^2.9.0"
+djangorestframework = "^3.16.0"
+django-cors-headers = "^4.7.0"
+rest-framework-simplejwt = "^0.0.2"
+djangorestframework-simplejwt = "^5.5.0"
+python-dotenv = "^1.1.1"
+psycopg = {extras = ["binary"], version = "^3.2.9"}
+gunicorn = "^23.0.0"
+openpyxl = "^3.1.5"
+reportlab = "^4.4.3"
+
+
+[tool.poetry.group.dev.dependencies]
+coverage = "*"
+poethepoet = "*"
+pytest = "*"
+requests = "*"
+rich = "*"
+ruff = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+name = "nexus_ci"
+url = "https://nexus-ci.onefiserv.net/repository/pypi-group/simple"
+priority = "primary"
+
+[tool.ruff]
+line-length = 120
+lint.select = ["A", "B", "C", "D", "E", "F", "I", "N", "PL", "RUF", "S", "T", "W"]
+lint.ignore = ["D203", "D213", "T201"]
+exclude = ["tests/*"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.poe.tasks]
+help.cmd = "$POE_ROOT/tasks/help.sh"
+help.help = "Print general Fiserv-cookiecutter specific help"
+
+test.cmd = "$POE_ROOT/tasks/build_and_run.sh test"
+test.help = "Run the project tests inside a container"
+
+run.cmd = "$POE_ROOT/tasks/build_and_run.sh build"
+run.help = "Run the default or given command inside a built container"
+
+explore.cmd = "$POE_ROOT/tasks/build_and_run.sh --entrypoint=/bin/bash build"
+explore.help = "Open a shell inside the container"
+
+add-pypi-source.cmd = "$POE_ROOT/tasks/add_pypi_source.sh"
+add-pypi-source.help = "Add a nexus-ci.onefiserv.net hosted pypi source"
+
+# individual build and run commands
+build.cmd = "$POE_ROOT/tasks/build.sh"
+build.help = "Build a target in the dockerfile (test and run builds automatically)"
+
+run-tag.cmd = "$POE_ROOT/tasks/run.sh"
+run-tag.help = "Run a tag/target from the dockerfile"
+
+# helpers
+# If updating the python version change it in the dependencies section as well.
+get-tags.cmd = "python3 $POE_ROOT/tasks/tag_versions.py --python-version 3.12"
+get-tags.help = "Used by other commands and the pipeline to find containers on Nexus"
+
+get-repo-url.shell = "git config --get remote.origin.url | sed -E 's|(https://)[^@]+@(.*)|\\1\\2|'"
+get-repo-url.help = "Get the origin url of the current git repo"
+
+get-local-repo.shell = "echo localhost${POE_ROOT,,}"
+get-local-repo.help = "Get an untagged image reference used for local builds."
+
+# only run the shell command given in the args if there are new files in the repo
+run-if-newer-than.cmd = "$POE_ROOT/tasks/run_if_newer_than.sh"
+run-if-newer-than.help = "Run a command if there are files in the repo newer than the given image."
+
+wait-for.cmd = "$POE_ROOT/tasks/wait_for.sh"
+wait-for.help = "Wait for an image to appear in a registry, used in the pipeline."

@@ -1,0 +1,11 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "redhat.ansible",
+        "redhat.vscode-yaml",
+        "numso.prettier-standard-vscode",
+        "timonwong.shellcheck"
+    ],
+}

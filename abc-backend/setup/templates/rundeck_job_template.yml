@@ -1,0 +1,42 @@
+---
+- defaultTab: output
+  description: ""
+  executionEnabled: true
+  loglevel: INFO
+  name: {job_name}
+  nodeFilterEditable: false
+  nodefilters:
+    dispatch:
+      excludePrecedence: true
+      keepgoing: false
+      rankOrder: ascending
+      successOnEmptyNodeFilter: false
+      threadcount: "1"
+    filter: us_ofd_workers
+  nodesSelectedByDefault: true
+  options:
+    - hidden: true
+      name: nexus_password
+      secure: true
+      storagePath: keys/vault/other/selfservice/nexus-ro-SakvUrsq
+      valueExposed: true
+  plugins:
+    ExecutionLifecycle: {{}}
+  scheduleEnabled: true
+  schedules: []
+  sequence:
+    commands:
+      - configuration:
+          dry_run: "false"
+          get_tag_version: "true"
+          image: {image_ref}
+          persistent_volume_job: "false"
+          persistent_volume_project: "false"
+          registry_password: ${{option.nexus_password}}
+          registry_username: SakvUrsq
+          vault_use_ansible_vars: "false"
+        nodeStep: true
+        type: container-command
+  keepgoing: false
+  strategy: node-first
+  tags: "{lab_user},generated_job"

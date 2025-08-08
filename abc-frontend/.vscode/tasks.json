@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Ansible Lint Fix",
+      "type": "shell",
+      "group": "none",
+      "command": "poetry run ansible-lint --fix ${file}",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "never"
+      }
+    },
+    {
+      "label": "Cookiecutter Setup",
+      "type": "shell",
+      "group": "none",
+      "command": "./setup/setup.sh",
+      "problemMatcher": [],
+      "presentation": {
+        "focus": true,
+        "panel": "dedicated",
+        "clear": true,
+        "close": true
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "Deploy to Rundeck",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/setup/templates/generate_new_job.py",
+        "${workspaceFolder}/setup/templates/rundeck_job_template.yml"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/setup/templates"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+.git/
+.gitignore
+.gitlab-ci.yml
+docker-compose.yml
+Dockerfile
+.env
+.venv
+.vscode/
+.*.sha256
+.envrc
+.mypy_cache/
+node_modules
+build
+npm-debug.log

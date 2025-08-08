@@ -1,0 +1,11 @@
+---
+skip_list:
+  - run-once
+warn_list:
+  - ignore-errors
+  - latest
+  - fqcn
+  - no-changed-when
+  - package-latest
+  - risky-file-permissions
+  - risky-shell-pipe
